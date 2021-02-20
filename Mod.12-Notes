@@ -1,0 +1,45 @@
+Module 12
+Intro to Linear Regression
+
+Preliminaries: install the {curl}, {ggplot2}, {gridExtra}, {manipulate}, and {lmodel2} packages.
+Objectives: discuss the use of simple linear regression to explore the relationship among two continuous variables: a single predictor variable and a single response variable.
+
+Covariance and Correlation
+  Regression modeling is one of the most important set of tools for looking at relationships among two or more variables. Simple bivariate plot of height by weight in the zombies dataset:
+    > library(curl)
+    > library(ggplot2)
+    > f <- curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN597_Fall19/zombies.csv")
+    > d<-read.csv(f, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+    > head(d)
+    > plot(data = d, height ~ weight) [ETA: returns a scatterplot; weight on x, height on y]
+  Covariance: expresses how much two numeric variables 'change together' and whether that change is positive or negative.
+  Variance: var(x) = sum((x-mean(x))^2/(n-1))
+  Covariance: cov(x, y) = sum(((x-mean(x))(y-mean(y)))/(n-1))
+  Challenge 1: What is the covariance between zombie weight and zombie height? What does it mean if it's positive or negatice? Does the order of the variables matter?
+    > w<-d$weight
+    > h<-d$height
+    > n<-length(w) [ETA: could also be length(h)]
+    > cov_wh<-sum((w-mean(w))*(h-mean(h))/(n-1))
+    > cov_wh
+    [1] 66.03314
+    > cov(w,h) [ETA: built-in R function]
+    [1] 66.03314
+  Correlation coefficient: standardized form of the covariance, which summarizes on a standard scale, -1 to +1, the strength and direction of a relationship.
+  Correlation: covariance divided by the product of the stdev of both variables. cor(x,y) = cov(x,y)/(sd(x)sd(y))
+  Challenge 2: calculate the correlation between zombie height and weight.
+    > sd_w<-sd(w)
+    > sd_h<-sd(h)
+    > cor_wh<-cov_wh/(sd_w*sd_h)
+    > cor_wh
+    [1] 0.8325862
+    > cor(w,h) [ETA: built-in R function]
+    [1] 0.8325862
+    > cor(w, h, method = "pearson") 
+    [1] 0.8325862
+  The above formulation of the correlation coefficient is Pearson's product-moment correlation coefficient and is often abbreviated as rho (ρ). There are other nonparametric forms of the correlation coefficient we might also calculate.
+    > cor(w, h, method = "kendall")
+    [1] 0.6331932
+    > cor(w, h, method = "spearman")
+    [1] 0.82668
+    
+Regression
