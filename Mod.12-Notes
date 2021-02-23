@@ -43,3 +43,7 @@ Covariance and Correlation
     [1] 0.82668
     
 Regression
+  Regression: the set of tools that lets us explore the relationships between variables further; regression analysis typically involves identifying and exploring linear models, or functions, that describe the relationship between two variables. This can be used to use one or more variables to predict the value of another, to develop and choose among different models of the relationship, and to do analyses of covariation among sets of variables to identify their relative explanatory power.
+  Linear regression: come up with a model or function that estimates the mean value of one variable, the response/outcome variable, given the particular value of another variable or set of variables, the predictor variable.
+  Bivariate regression: single predictor and single response variable.Y=β0+β1Xi+ϵi; Y is the linear function and X is the predictor/independent variable; the first β0 is the y intercept; β1 is the slope of the line; ϵi is a normal random variable ~N(0, sigma^2), with stdev assumed to be constant across all values of X. The process of estimating the beta regression coefficients is called 'fitting the model'.
+  Ordinary least squares (OLS) regression: finding the best fit line whose coefficients minimize the sum of the squared deviations of each observation in the Y direction from that predicted by the line. E(y-(b1x + b0))^2; E(height-(b1*weight + b0))^2.
