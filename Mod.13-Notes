@@ -1,0 +1,35 @@
+Module 13
+Elements of Regression Analysis
+
+Objectives: 
+  Understand that the object of regression is to partition variancein the response variable among different sources, that can be explained by the regression model itself, v. left-over error or residaul variance.
+  Calculate standard errors for regression coefficients and predicted values of response variable based on the regression model, as seen in the lm() function.
+  Discuss ways to transform non-normally distributed data to make it more appropriate to analyze using linear regression.
+
+Packages: {curl}, {car}
+
+Terms and Definitions
+  SSY = SSR + SSE: (sum of squares of y/total variation in y) equals )regression sum of squares/variation explained by the model) plus (error sum of squares/variation left over as error)
+  ANOVA table for the model: summary on how variance is partitioned among different sources; requires various sums of squares and df associated with each variation.
+
+Functions and Arguments
+  lm(data = [data table], [y variable] ~ [x variable])
+  
+  [lm() variable]$model$[column name]: data structure that duplicates the raw data.
+  [lm() variable]$fitted.values: predicted [variable being examined]
+
+Code
+  Analysis of Variance and ANOVA tables: 
+    > library(curl)
+    > f<-curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN597_Fall19/zombies.csv")
+    > d<-read.csv(f, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+    > m<-lm(data = d, height ~ weight)
+    > SSY<-sum((m$model$height-mean(m$model$height))^2)
+    > SSY
+    [1] 18558.61
+    > SSR<-sum((m$fitted.values-mean(m$model$height))^2)
+    > SSR
+    [1] 12864.82
+    > SSE<-sum((m$model$height-m$fitted.values)^2)
+    > SSE
+    [1] 5693.785
