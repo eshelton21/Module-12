@@ -10,13 +10,22 @@ Packages: {curl}, {car}
 
 Terms and Definitions
   SSY = SSR + SSE: (sum of squares of y/total variation in y) equals )regression sum of squares/variation explained by the model) plus (error sum of squares/variation left over as error)
-  ANOVA table for the model: summary on how variance is partitioned among different sources; requires various sums of squares and df associated with each variation.
+  ANOVA table for the model: summary on how variance is partitioned among different sources; requires various sums of squares and df associated with each variation. Sum of squares, df, Mean Squares (SS/df) for regression, error, and total; one F ratio.
+  df for SSR = number of predictor variables (in this case 1); df for SSE = n-2; df for SSY = n-1.
+  F ratio: ratio of the variance explained by the regression model to the remaining, unexplained variance; MSR/MSE.
+  F distribution: a continuous probability distribution, defined for x≥0 and governed by the parameters df1 and df2. The overall significance of the regression models is found by evaluating the F ratio stat against the F distribution. The critical value above which the variances being comparable is rejected is given by qf(p,df1,df2), where p=1-alpha and df1 and df2 are the dfs in the sources being compared.
+  Coefficient of determination: R-squared value, fraction of the total variaiton explained by the model. The square root of this is the correlation coefficient.
+  Standard error of the regression slope (beta1) = sqrt(MSE/SSX)
+  Standard error of the intercept (beta0) = sqrt((MSE*sum(m$model$weight^2))/(1000*SSX))
+  Standard error of each predicted value of y (yhat) = sqrt(MSE*(1/n+(m$model$weight - mean(m$model$weight))^2/SSX))
 
 Functions and Arguments
-  lm(data = [data table], [y variable] ~ [x variable])
+  >lm(data = [data table], [y variable] ~ [x variable])
   
-  [lm() variable]$model$[column name]: data structure that duplicates the raw data.
-  [lm() variable]$fitted.values: predicted [variable being examined]
+  +[lm() variable]$model$[column name]: data structure that duplicates the raw data.
+  +[lm() variable]$fitted.values: predicted [variable being examined]
+  >1-pf(q = fratio, df1 = 1, df2 = 998): directly estimates a p value associated with the calculated f ratio value.
+  >aov(): returns a model object that we can use summary() on to look at the results; summary.aov() can also be used.
 
 Code
   Analysis of Variance and ANOVA tables: 
@@ -33,3 +42,80 @@ Code
     > SSE<-sum((m$model$height-m$fitted.values)^2)
     > SSE
     [1] 5693.785
+    > df_regression<-1
+    > df_error<-998
+    > df_y<-999
+    > MSR<-SSR/df_regression
+    > MSE<-SSE/df_error
+    > MSY<-SSY/df_y
+    > fratio<-MSR/MSE
+    > fratio
+    [1] 2254.931
+    > curve(df(x, df = 1, df2 = 1), col = "green", lty = 3, lwd = 2, xlim = c(0, 10), 
+    +       main = "Some Example F Distributions\n(vertical line shows critical value for df1=1,df2=998)", 
+    +       ylab = "f(x)", xlab = "x")
+    > curve(df(x, df = 2, df2 = 2), col = "blue", lty = 3, lwd = 2, add = TRUE)
+    > curve(df(x, df = 4, df2 = 4), col = "red", lty = 3, lwd = 2, add = TRUE)
+    > curve(df(x, df = 8, df2 = 6), col = "purple", lty = 3, lwd = 2, add = TRUE)
+    > curve(df(x, df = 1, df2 = 998), col = "black", lwd = 3, add = TRUE)
+    > legend("top", c("df1=1,df2=1", "df1=2,df2=2", "df1=4,df2=4", "df1=8,df2=6", 
+    +                 "df1=1,df2=998"), lty = 3, lwd = 2, col = c("green", "blue", "red", "purple", 
+    +                                                             "black"), bty = "n", cex = 0.75)
+    > fcrit<-qf(p = 0.95, df1 = 1, df2 = 998)
+    > fcrit
+    [1] 3.850793
+    > abline(v = fcrit)
+    > abline(h = 0)
+    > polygon(cbind(c(fcrit, seq(from = fcrit, to = 10, length.out = 1000), 8), c(0, df(seq(from = fcrit, to = 8, length.out = 1000), df1 = 1, df2 = 998), 0)), border = "black", col = "grey"
+    > 1-pf(q = fratio, df1 = 1, df2 = 998)
+    [1] 0
+    > a<-aov(data = d, height ~ weight)
+    > summary(a)
+                 Df Sum Sq Mean Sq F value Pr(>F)    
+    weight        1  12865   12865    2255 <2e-16 ***
+    Residuals   998   5694       6                   
+    ---
+    Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+    > summary.aov(m)
+                 Df Sum Sq Mean Sq F value Pr(>F)    
+    weight        1  12865   12865    2255 <2e-16 ***
+    Residuals   998   5694       6                   
+    ---
+    Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+    > rsquared<-SSR/SSY
+    > rsquared
+    [1] 0.6931998
+    > rho<-sqrt(rsquared)
+    > rho
+    [1] 0.8325862
+  Standard Errors of Regression Coefficients
+    > SSX<-sum((m$model$weight-mean(m$model$weight))^2)
+    > SEbeta<-sqrt(MSE/SSX)
+    > SEbeta
+    [1] 0.004106858
+    > SEbeta0<-sqrt((MSE*sum(m$model$weight^2))/(1000*SSX))
+    > SEbeta0
+    [1] 0.5958147
+    > SEyhat<-sqrt(MSE*(1/1000+(m$model$weight-mean(m$model$weight))^2/SSX))
+    > head(SEyhat)
+    [1] 0.08978724 0.07620966 0.08414480 0.09533986 0.08904151 0.08341218
+    > summary(m)
+
+    Call:
+    lm(formula = height ~ weight, data = d)
+
+    Residuals:
+        Min      1Q  Median      3Q     Max 
+    -7.1519 -1.5206 -0.0535  1.5167  9.4439 
+
+    Coefficients:
+                 Estimate Std. Error t value Pr(>|t|)    
+    (Intercept) 39.565446   0.595815   66.41   <2e-16 ***
+    weight       0.195019   0.004107   47.49   <2e-16 ***
+    ---
+    Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+    Residual standard error: 2.389 on 998 degrees of freedom
+    Multiple R-squared:  0.6932,	Adjusted R-squared:  0.6929 
+    F-statistic:  2255 on 1 and 998 DF,  p-value: < 2.2e-16
+  Model Checking
