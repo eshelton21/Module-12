@@ -18,6 +18,11 @@ Terms and Definitions
   Standard error of the regression slope (beta1) = sqrt(MSE/SSX)
   Standard error of the intercept (beta0) = sqrt((MSE*sum(m$model$weight^2))/(1000*SSX))
   Standard error of each predicted value of y (yhat) = sqrt(MSE*(1/n+(m$model$weight - mean(m$model$weight))^2/SSX))
+  Shapiro-Wilk Normality Test: a stat test of the distribution of the model, a low p value indicates deviation from normal distribution; shapiro.test().
+  Anderson-Darling test: not as powerful as Shapiro-Wilk, best used when n≥8; {nortest}, ad.test().
+  Martinez-Iglexicz test: test for dispersion from the median, powerful for heavy-tailed distributions, best with small samples, eg n≥3; {PoweR}, stat0032.MartinezIglewicz().
+  Kolmogorov-Smirnov (with Lilliefors adjustment) test: not as good as Anderson-Darling, requires n≥4; {nortest}, lillie.test().
+  D-Agostino Omnibus test (based on assessment of skew and kurtosis): robust against identical values in distribution, skewness test requires n≥8, kurtosis test requires n≥20; {fBasics}, dagoTest().
 
 Functions and Arguments
   >lm(data = [data table], [y variable] ~ [x variable])
@@ -119,3 +124,63 @@ Code
     Multiple R-squared:  0.6932,	Adjusted R-squared:  0.6929 
     F-statistic:  2255 on 1 and 998 DF,  p-value: < 2.2e-16
   Model Checking
+    > m<-lm(data = d, height ~ weight)
+    > plot(x = d$weight, y = m$residuals)
+    > e<-resid(m)
+    > plot(x = d$weight, y = e)
+    > hist(e, xlim = c(-4*sd(e), 4*sd(e)), breaks = 20, main = "Histogram of Residuals")
+    > plot(m$model$weight, m$residuals)
+    > par(mfrow = c(2,2))
+    > plot(m)
+    > qqnorm(m$residuals)
+    > par(mfrow = c(1,1))
+    > qqPlot(m$residuals)
+    [1] 954 799
+    > s<-shapiro.test(m$residuals)
+    > s
+
+          	Shapiro-Wilk normality test
+
+    data:  m$residuals
+    W = 0.99713, p-value = 0.07041
+    > f<-curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN597_Fall19/KamilarAndCooperData.csv")
+    > d<-read.csv(f, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+    > head(d)
+    > plot(data = d, WeaningAge_d ~ Body_mass_female_mean)
+    > model<-lm(data = d, WeaningAge_d ~ Body_mass_female_mean)
+    > summary(model)
+
+    Call:
+    lm(formula = WeaningAge_d ~ Body_mass_female_mean, data = d)
+
+    Residuals:
+        Min      1Q  Median      3Q     Max 
+    -720.39 -115.48  -54.05   58.11  471.22 
+
+    Coefficients:
+                           Estimate Std. Error t value Pr(>|t|)    
+    (Intercept)           2.016e+02  2.012e+01   10.02   <2e-16 ***
+    Body_mass_female_mean 2.013e-02  1.927e-03   10.44   <2e-16 ***
+    ---
+    Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+    Residual standard error: 183.4 on 114 degrees of freedom
+      (97 observations deleted due to missingness)
+    Multiple R-squared:  0.489,	Adjusted R-squared:  0.4845 
+    F-statistic: 109.1 on 1 and 114 DF,  p-value: < 2.2e-16
+    > plot(model)
+    Hit <Return> to see next plot: [ETA: Residuals v. Fitted]
+    Hit <Return> to see next plot: [ETA: Normal Q-Q]
+    Hit <Return> to see next plot: [ETA: Scale-Location]
+    Hit <Return> to see next plot: [ETA: Residuals v. Leverage]
+    > qqPlot(model$residuals)
+    97 44 
+    48 24 
+    > s<-shapiro.test(model$residuals)
+    > s
+
+          	Shapiro-Wilk normality test
+
+    data:  model$residuals
+    W = 0.86291, p-value = 5.825e-09
+  Data Transformations
