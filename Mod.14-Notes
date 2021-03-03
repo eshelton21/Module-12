@@ -1,0 +1,16 @@
+Module 14
+Basic Categorical Data Analysis and ANOVA
+
+Objectives:
+  Examine how simple linear regression can be applied to dataset where our predictor variable is discrete/categorical rather than continuous.
+  See how one-/two-way analysis of variance (ANOVA) are specific applications of simple and multiple linear regression.
+  Look at other methods for basic statistical analysis of categorical data.
+
+Packages: {curl}, {ggplot2}, {dplyr}, {car}
+
+Terms and Definitions:
+
+Functions and Arguments:
+
+Code:
+  Categorical Predictors in Regression

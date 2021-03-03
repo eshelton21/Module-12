@@ -1,7 +1,7 @@
 Module 13
 Elements of Regression Analysis
 
-Objectives: 
+Objectives:
   Understand that the object of regression is to partition variancein the response variable among different sources, that can be explained by the regression model itself, v. left-over error or residaul variance.
   Calculate standard errors for regression coefficients and predicted values of response variable based on the regression model, as seen in the lm() function.
   Discuss ways to transform non-normally distributed data to make it more appropriate to analyze using linear regression.
@@ -9,31 +9,67 @@ Objectives:
 Packages: {curl}, {car}
 
 Terms and Definitions
-  SSY = SSR + SSE: (sum of squares of y/total variation in y) equals )regression sum of squares/variation explained by the model) plus (error sum of squares/variation left over as error)
-  ANOVA table for the model: summary on how variance is partitioned among different sources; requires various sums of squares and df associated with each variation. Sum of squares, df, Mean Squares (SS/df) for regression, error, and total; one F ratio.
-  df for SSR = number of predictor variables (in this case 1); df for SSE = n-2; df for SSY = n-1.
-  F ratio: ratio of the variance explained by the regression model to the remaining, unexplained variance; MSR/MSE.
-  F distribution: a continuous probability distribution, defined for x≥0 and governed by the parameters df1 and df2. The overall significance of the regression models is found by evaluating the F ratio stat against the F distribution. The critical value above which the variances being comparable is rejected is given by qf(p,df1,df2), where p=1-alpha and df1 and df2 are the dfs in the sources being compared.
-  Coefficient of determination: R-squared value, fraction of the total variaiton explained by the model. The square root of this is the correlation coefficient.
-  Standard error of the regression slope (beta1) = sqrt(MSE/SSX)
-  Standard error of the intercept (beta0) = sqrt((MSE*sum(m$model$weight^2))/(1000*SSX))
-  Standard error of each predicted value of y (yhat) = sqrt(MSE*(1/n+(m$model$weight - mean(m$model$weight))^2/SSX))
-  Shapiro-Wilk Normality Test: a stat test of the distribution of the model, a low p value indicates deviation from normal distribution; shapiro.test().
-  Anderson-Darling test: not as powerful as Shapiro-Wilk, best used when n≥8; {nortest}, ad.test().
-  Martinez-Iglexicz test: test for dispersion from the median, powerful for heavy-tailed distributions, best with small samples, eg n≥3; {PoweR}, stat0032.MartinezIglewicz().
-  Kolmogorov-Smirnov (with Lilliefors adjustment) test: not as good as Anderson-Darling, requires n≥4; {nortest}, lillie.test().
-  D-Agostino Omnibus test (based on assessment of skew and kurtosis): robust against identical values in distribution, skewness test requires n≥8, kurtosis test requires n≥20; {fBasics}, dagoTest().
+  -SSY = SSR + SSE: (sum of squares of y/total variation in y) equals )regression sum of squares/variation explained by the model) plus (error sum of squares/variation left over as error)
+  -ANOVA table for the model: summary on how variance is partitioned among different sources; requires various sums of squares and df associated with each variation. Sum of squares, df, Mean Squares (SS/df) for regression, error, and total; one F ratio.
+  -df for SSR = number of predictor variables (in this case 1); df for SSE = n-2; df for SSY = n-1.
+  -F ratio: ratio of the variance explained by the regression model to the remaining, unexplained variance; MSR/MSE.
+  -F distribution: a continuous probability distribution, defined for x≥0 and governed by the parameters df1 and df2. The overall significance of the regression models is found by evaluating the F ratio stat against the F distribution. The critical value above which the variances being comparable is rejected is given by qf(p,df1,df2), where p=1-alpha and df1 and df2 are the dfs in the sources being compared.
+  -Coefficient of determination: R-squared value, fraction of the total variaiton explained by the model. The square root of this is the correlation coefficient.
+  -Standard error of the regression slope (beta1) = sqrt(MSE/SSX)
+  -Standard error of the intercept (beta0) = sqrt((MSE*sum(m$model$weight^2))/(1000*SSX))
+  -Standard error of each predicted value of y (yhat) = sqrt(MSE*(1/n+(m$model$weight - mean(m$model$weight))^2/SSX))
+  -Shapiro-Wilk Normality Test: a stat test of the distribution of the model, a low p value indicates deviation from normal distribution; shapiro.test().
+  -Anderson-Darling test: not as powerful as Shapiro-Wilk, best used when n≥8; {nortest}, ad.test().
+  -Martinez-Iglexicz test: test for dispersion from the median, powerful for heavy-tailed distributions, best with small samples, eg n≥3; {PoweR}, stat0032.MartinezIglewicz().
+  -Kolmogorov-Smirnov (with Lilliefors adjustment) test: not as good as Anderson-Darling, requires n≥4; {nortest}, lillie.test().
+  -D-Agostino Omnibus test (based on assessment of skew and kurtosis): robust against identical values in distribution, skewness test requires n≥8, kurtosis test requires n≥20; {fBasics}, dagoTest().
+  -In order for linear regression models to be appropriate, the variables and error variance need to be normally distributed, and there should be homogeneity of variance in the response variable around the range of the predictor variable. If there are non-normal distributions, the log transformation can be applied to positive numeric variables with heavy skew to dramatically reduce the overall range of the data and bring extreme observations closer to a measure of centrality.
+  -The logarithm for a number to which a base value must be raised in order to obtain that number.
+  -Other common numerical transformations that can be useful for changing a variable's distribution to more closely approximate the normal:
+    logX: y = a+b*ln(x)
+    logY: y = exp(a+bx)
+    asymptotic: y = (ax)/(1+bx)
+    reciprocal: y = a+(b/x)
+    power law: y = ax^b
+    exponential: y = ae^(bx)
 
 Functions and Arguments
   >lm(data = [data table], [y variable] ~ [x variable])
-  
+
   +[lm() variable]$model$[column name]: data structure that duplicates the raw data.
   +[lm() variable]$fitted.values: predicted [variable being examined]
   >1-pf(q = fratio, df1 = 1, df2 = 998): directly estimates a p value associated with the calculated f ratio value.
   >aov(): returns a model object that we can use summary() on to look at the results; summary.aov() can also be used.
+  > par(mfrow = c(1,2)): graphs of common numerical transformations.
+      > a<-2
+      > b<-2
+    > x<-seq(from = 0, to = 100, length.out = 1000): logX
+      > y<-a+b*log(x)
+      > plot(x, y, type = "l", main = "untransformed")
+      > plot(log(x), y, type = "l", main = "log(x)")
+    > x<-seq(from = 0, to = 10, length.out = 1000): logY
+      > y<-exp(a+b*x)
+      > plot(x, y, type = "l", main = "untransformed")
+      > plot(x, log(y), type = "l", main = "log(y)")
+    > x<-seq(from = 1, to = 100, length.out = 100): asymptotic
+      > y <- (a*x)/(1+b*x)
+      > plot(x, y, type = "l", main = "untransformed")
+      > plot(1/x, y, type = "l", main = "1/x")
+    > x<-seq(from = 1, to = 100, length.out = 100): reciprocal
+      > y<-a+b/x
+      > plot(x, y, type = "l", main = "untransformed")
+      > plot(1/x, y, type = "l", main = "1/x")
+    > x<-seq(from = 1, to = 100, length.out = 100): power law
+      > y<-a*x^b
+      > plot(x, y, type = "l", main = "untransformed")
+      > plot(x^b, y, type = "l", main = "x^b")
+    > x<-seq(from = 1, to = 10, length.out = 100): exponential
+      > y<-a*exp(b*x)
+      > plot(x, y, type = "l", main = "untransformed")
+      > plot(x, log(y), type = "l", main = "log(y)")
 
 Code
-  Analysis of Variance and ANOVA tables: 
+  Analysis of Variance and ANOVA tables:
     > library(curl)
     > f<-curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN597_Fall19/zombies.csv")
     > d<-read.csv(f, header = TRUE, sep = ",", stringsAsFactors = FALSE)
@@ -56,15 +92,15 @@ Code
     > fratio<-MSR/MSE
     > fratio
     [1] 2254.931
-    > curve(df(x, df = 1, df2 = 1), col = "green", lty = 3, lwd = 2, xlim = c(0, 10), 
-    +       main = "Some Example F Distributions\n(vertical line shows critical value for df1=1,df2=998)", 
+    > curve(df(x, df = 1, df2 = 1), col = "green", lty = 3, lwd = 2, xlim = c(0, 10),
+    +       main = "Some Example F Distributions\n(vertical line shows critical value for df1=1,df2=998)",
     +       ylab = "f(x)", xlab = "x")
     > curve(df(x, df = 2, df2 = 2), col = "blue", lty = 3, lwd = 2, add = TRUE)
     > curve(df(x, df = 4, df2 = 4), col = "red", lty = 3, lwd = 2, add = TRUE)
     > curve(df(x, df = 8, df2 = 6), col = "purple", lty = 3, lwd = 2, add = TRUE)
     > curve(df(x, df = 1, df2 = 998), col = "black", lwd = 3, add = TRUE)
-    > legend("top", c("df1=1,df2=1", "df1=2,df2=2", "df1=4,df2=4", "df1=8,df2=6", 
-    +                 "df1=1,df2=998"), lty = 3, lwd = 2, col = c("green", "blue", "red", "purple", 
+    > legend("top", c("df1=1,df2=1", "df1=2,df2=2", "df1=4,df2=4", "df1=8,df2=6",
+    +                 "df1=1,df2=998"), lty = 3, lwd = 2, col = c("green", "blue", "red", "purple",
     +                                                             "black"), bty = "n", cex = 0.75)
     > fcrit<-qf(p = 0.95, df1 = 1, df2 = 998)
     > fcrit
@@ -76,15 +112,15 @@ Code
     [1] 0
     > a<-aov(data = d, height ~ weight)
     > summary(a)
-                 Df Sum Sq Mean Sq F value Pr(>F)    
+                 Df Sum Sq Mean Sq F value Pr(>F)
     weight        1  12865   12865    2255 <2e-16 ***
-    Residuals   998   5694       6                   
+    Residuals   998   5694       6
     ---
     Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
     > summary.aov(m)
-                 Df Sum Sq Mean Sq F value Pr(>F)    
+                 Df Sum Sq Mean Sq F value Pr(>F)
     weight        1  12865   12865    2255 <2e-16 ***
-    Residuals   998   5694       6                   
+    Residuals   998   5694       6
     ---
     Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
     > rsquared<-SSR/SSY
@@ -110,18 +146,18 @@ Code
     lm(formula = height ~ weight, data = d)
 
     Residuals:
-        Min      1Q  Median      3Q     Max 
-    -7.1519 -1.5206 -0.0535  1.5167  9.4439 
+        Min      1Q  Median      3Q     Max
+    -7.1519 -1.5206 -0.0535  1.5167  9.4439
 
     Coefficients:
-                 Estimate Std. Error t value Pr(>|t|)    
+                 Estimate Std. Error t value Pr(>|t|)
     (Intercept) 39.565446   0.595815   66.41   <2e-16 ***
     weight       0.195019   0.004107   47.49   <2e-16 ***
     ---
     Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
     Residual standard error: 2.389 on 998 degrees of freedom
-    Multiple R-squared:  0.6932,	Adjusted R-squared:  0.6929 
+    Multiple R-squared:  0.6932,	Adjusted R-squared:  0.6929
     F-statistic:  2255 on 1 and 998 DF,  p-value: < 2.2e-16
   Model Checking
     > m<-lm(data = d, height ~ weight)
@@ -154,11 +190,11 @@ Code
     lm(formula = WeaningAge_d ~ Body_mass_female_mean, data = d)
 
     Residuals:
-        Min      1Q  Median      3Q     Max 
-    -720.39 -115.48  -54.05   58.11  471.22 
+        Min      1Q  Median      3Q     Max
+    -720.39 -115.48  -54.05   58.11  471.22
 
     Coefficients:
-                           Estimate Std. Error t value Pr(>|t|)    
+                           Estimate Std. Error t value Pr(>|t|)
     (Intercept)           2.016e+02  2.012e+01   10.02   <2e-16 ***
     Body_mass_female_mean 2.013e-02  1.927e-03   10.44   <2e-16 ***
     ---
@@ -166,7 +202,7 @@ Code
 
     Residual standard error: 183.4 on 114 degrees of freedom
       (97 observations deleted due to missingness)
-    Multiple R-squared:  0.489,	Adjusted R-squared:  0.4845 
+    Multiple R-squared:  0.489,	Adjusted R-squared:  0.4845
     F-statistic: 109.1 on 1 and 114 DF,  p-value: < 2.2e-16
     > plot(model)
     Hit <Return> to see next plot: [ETA: Residuals v. Fitted]
@@ -174,8 +210,8 @@ Code
     Hit <Return> to see next plot: [ETA: Scale-Location]
     Hit <Return> to see next plot: [ETA: Residuals v. Leverage]
     > qqPlot(model$residuals)
-    97 44 
-    48 24 
+    97 44
+    48 24
     > s<-shapiro.test(model$residuals)
     > s
 
@@ -184,3 +220,72 @@ Code
     data:  model$residuals
     W = 0.86291, p-value = 5.825e-09
   Data Transformations
+    > f<-curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN597_Fall19/KamilarAndCooperData.csv")
+    > d<-read.csv(f, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+    > d$logWeaningAge<-log(d$WeaningAge_d)
+    > d$logFemaleBodyMass<-log(d$Body_mass_female_mean)
+    > plot(data = d, logWeaningAge ~ logFemaleBodyMass)
+    > model<-lm(data = d, logWeaningAge ~ logFemaleBodyMass)
+    > summary(model)
+
+    Call:
+    lm(formula = logWeaningAge ~ logFemaleBodyMass, data = d)
+
+    Residuals:
+         Min       1Q   Median       3Q      Max
+    -1.10639 -0.32736  0.00848  0.32214  1.11010
+
+    Coefficients:
+                      Estimate Std. Error t value Pr(>|t|)
+    (Intercept)         1.7590     0.2196   8.011 1.08e-12 ***
+    logFemaleBodyMass   0.4721     0.0278  16.983  < 2e-16 ***
+    ---
+    Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+    Residual standard error: 0.4532 on 114 degrees of freedom
+      (97 observations deleted due to missingness)
+    Multiple R-squared:  0.7167,	Adjusted R-squared:  0.7142
+    F-statistic: 288.4 on 1 and 114 DF,  p-value: < 2.2e-16
+
+    > plot(model)
+    Hit <Return> to see next plot: [ETA: Residuals vs Fitted]
+    Hit <Return> to see next plot: [ETA: Normal Q-Q]
+    Hit <Return> to see next plot: [ETA: Scale-Location]
+    Hit <Return> to see next plot: [ETA: Residuals vs Leverage]
+    > qqPlot(model$residuals)
+     44 213
+     24 116
+    > s<-shapiro.test(model$residuals)
+    > s
+
+	          Shapiro-Wilk normality test
+
+    data:  model$residuals
+    W = 0.99367, p-value = 0.8793
+    > par(mfrow = c(1,2))
+    > a<-2
+    > b<-2
+    > x<-seq(from = 0, to = 100, length.out = 1000)
+    > y<-a+b*log(x)
+    > plot(x, y, type = "l", main = "untransformed")
+    > plot(log(x), y, type = "l", main = "log(x)")
+    > x<-seq(from = 0, to = 10, length.out = 1000)
+    > y<-exp(a+b*x)
+    > plot(x, y, type = "l", main = "untransformed")
+    > plot(x, log(y), type = "l", main = "log(y)")
+    > x<-seq(from = 1, to = 100, length.out = 100)
+    > y<-(a*x)/(1+b*x)
+    > plot(x, y, type = "l", main = "untransformed")
+    > plot(1/x, y, type = "l", main = "1/x")
+    > x<-seq(from = 1, to = 100, length.out = 100)
+    > y<-a+b/x
+    > plot(x, y, type = "l", main = "untransformed")
+    > plot(1/x, y, type = "l", main = "1/x")
+    > x<-seq(from = 1, to = 100, length.out = 100)
+    > y<-a*x^b
+    > plot(x, y, type = "l", main = "untransformed")
+    > plot(x^b, y, type = "l", main = "x^b")
+    > x<-seq(from = 1, to = 10, length.out = 100)
+    > y<-a*exp(b*x)
+    > plot(x, y, type = "l", main = "untransformed")
+    > plot(x, log(y), type = "l", main = "log(y)")
